@@ -1,6 +1,11 @@
-# FaceFlow
+<p align="center">
+  <img src="assets/logo.png" alt="FaceFlow" width="280">
+</p>
 
-Create stunning timelapse videos of your face over the years. FaceFlow automatically detects faces, aligns them consistently, and displays your age — all through a sleek local web interface.
+<p align="center">
+  Create stunning timelapse videos of your face over the years.<br>
+  Automatically detects faces, aligns them consistently, and displays your age.
+</p>
 
 ![FaceFlow Home](assets/home.jpeg)
 
