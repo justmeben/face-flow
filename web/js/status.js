@@ -12,6 +12,20 @@ export function setupStatusPage() {
     document.getElementById('scanBtn').addEventListener('click', runScan);
     document.getElementById('scanBtnMain').addEventListener('click', runScan);
     document.getElementById('refreshStatusBtn').addEventListener('click', refreshStatus);
+
+    // Welcome section collapse toggle
+    const welcomeSection = document.getElementById('welcomeSection');
+    const welcomeToggle = document.getElementById('welcomeToggle');
+
+    // Restore state from localStorage
+    if (localStorage.getItem('welcomeCollapsed') === 'true') {
+        welcomeSection.classList.add('collapsed');
+    }
+
+    welcomeToggle.addEventListener('click', () => {
+        welcomeSection.classList.toggle('collapsed');
+        localStorage.setItem('welcomeCollapsed', welcomeSection.classList.contains('collapsed'));
+    });
 }
 
 export async function refreshStatus() {

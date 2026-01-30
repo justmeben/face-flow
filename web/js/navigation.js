@@ -2,7 +2,7 @@
 // Page switching, keyboard navigation, and sidebar visibility
 
 import { state } from './state.js';
-import { navigatePhoto } from './preview.js';
+import { navigatePhoto, renderPreviewPhoto } from './preview.js';
 import { setEditorLandmark, exitEditMode } from './editor.js';
 import { refreshStatus } from './status.js';
 import { syncFromPreview } from './render.js';
@@ -29,6 +29,9 @@ export function setupNavigation() {
         if (e.key === 'ArrowLeft') navigatePhoto(-1);
         else if (e.key === 'ArrowRight') navigatePhoto(1);
     });
+
+    // Set initial sidebar visibility
+    updateSidebarVisibility();
 }
 
 export function switchPage(page) {
@@ -40,6 +43,11 @@ export function switchPage(page) {
 
     if (page === 'status') {
         refreshStatus();
+    } else if (page === 'preview') {
+        // Re-render to fix centering
+        if (state.previewPhoto) {
+            renderPreviewPhoto();
+        }
     } else if (page === 'render') {
         syncFromPreview();
     }

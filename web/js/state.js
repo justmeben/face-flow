@@ -9,7 +9,7 @@ export const state = {
     birthDate: '1996-02-07',
 
     // Current page
-    currentPage: 'preview',
+    currentPage: 'status',
 
     // Preview view state
     previewIndex: 0,
