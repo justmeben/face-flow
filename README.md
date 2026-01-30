@@ -1,27 +1,39 @@
 # FaceFlow
 
-Local web UI tool to create a video of your face-over-time, with photos automatically aligned and age displayed.
+Create stunning timelapse videos of your face over the years. FaceFlow automatically detects faces, aligns them consistently, and displays your age — all through a sleek local web interface.
+
+![FaceFlow Home](assets/home.jpeg)
+
+## Features
+
+- **Automatic Face Detection** — Uses face_recognition to find and match your face across photos
+- **Smart Alignment** — Faces are automatically scaled and rotated for smooth transitions
+- **Age Display** — Shows your exact age on each frame based on photo dates
+- **Video Export** — Render to MP4, GIF, or PNG sequence with customizable settings
+- **Manual Corrections** — Fix detection errors with the landmark editor
+- **Privacy First** — Everything runs locally, your photos never leave your machine
+
+![FaceFlow Preview](assets/preview.jpeg)
 
 ## Quick Start
 
-1. **Setup**
-   ```bash
-   python -m venv venv && source venv/bin/activate
-   pip install -r requirements.txt
-   ```
+```bash
+# Setup
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
 
-2. **Run**
-   ```bash
-   python server.py
-   # Open http://localhost:8080/web/
-   ```
+# Run
+python server.py
+# Open http://localhost:8080/web/
+```
 
-1. **Add Photos**
-   - Put your face photos in `photos/`
-   - Put 1-3 clear reference photos in `reference/`
+## Usage
 
-
-4. **Scan** - Click "Scan Photos" on the Home page to detect faces
+1. **Add Photos** — Copy your photos into the `photos/` folder
+2. **Add References** — Add 1-3 clear photos of your face to `reference/` for identification
+3. **Scan** — Click "Scan Photos" on the Home page to detect and match faces
+4. **Preview** — Browse your timeline, adjust alignment settings
+5. **Render** — Export your timelapse video
 
 ## Requirements
 
@@ -37,9 +49,8 @@ faceflow/
 │   └── face_data.json   # Detection results + birth date
 ├── src/
 │   └── detect_faces.py  # Face detection script
-├── web/
-│   └── index.html       # Web viewer
-├── video/               # Remotion video project
+├── web/                 # Web UI
+├── out/                 # Rendered videos
 ├── server.py            # HTTP server with API
 └── requirements.txt
 ```
@@ -49,6 +60,10 @@ faceflow/
 | Key | Action |
 |-----|--------|
 | `←` `→` | Navigate photos |
-| `1` `2` `3` | Select landmark (in edit mode) |
-| `Esc` | Cancel landmark editing |
-| Mouse wheel | Adjust scale (preview) |
+| `Mouse wheel` | Adjust face scale |
+| `1` `2` `3` | Select landmark (edit mode) |
+| `Esc` | Cancel editing |
+
+## License
+
+MIT
