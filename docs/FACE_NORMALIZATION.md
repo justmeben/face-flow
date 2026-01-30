@@ -15,7 +15,7 @@ The system detects faces in photos, extracts facial landmarks, and applies a **s
 
 ## JSON Data Structure
 
-### Main File: `output/face_data.json`
+### Main File: `data/face_data.json`
 
 ```json
 {
@@ -44,7 +44,7 @@ The system detects faces in photos, extracts facial landmarks, and applies a **s
   },
   "faces": {
     "total_count": 3,
-    "ben": {
+    "subject": {
       "detected": true,
       "confidence": 0.92,
       "bounding_box": {
@@ -108,13 +108,14 @@ For normalization, we use **3 anchor points** derived from the landmarks:
 
 For photos where automatic detection fails or is inaccurate, use the **Landmark Editor**:
 
-1. Start the server: `python server.py` (NOT `python -m http.server`)
-2. Open `http://localhost:8080/web/editor.html`
-3. Select a photo from the dropdown
-4. Click to place: Left Eye → Right Eye → Mouth
-5. Click "Save to face_data.json"
+1. Start the server: `python server.py`
+2. Open `http://localhost:8080/web/`
+3. Navigate to the photo in Preview mode
+4. Click "Fix Detection" in the Tools section
+5. Click to place: Left Eye → Right Eye → Mouth
+6. Click "Save"
 
-The editor directly updates `face_data.json` with your manually placed landmarks.
+The editor directly updates `data/face_data.json` with your manually placed landmarks.
 
 ---
 
@@ -230,80 +231,3 @@ Where:
 - `θ` = rotation angle = targetAngle - sourceAngle
 - `tx`, `ty` = translation to center the face
 
----
-
-## Usage
-
-### Web Viewer
-
-1. Run the detection script: `python src/detect_faces.py`
-2. Start the server: `python server.py` (enables saving from editor)
-3. Open `http://localhost:8080/web/centered.html`
-
-### Controls
-
-| Control | Function |
-|---------|----------|
-| **Scrubber** | Drag to navigate between photos |
-| **Arrow Keys** | Previous/next photo |
-| **Mouse Wheel** | Adjust target eye distance (zoom) |
-| **Scale Slider** | Set target eye distance in pixels |
-| **Angle Input** | Rotate normalized face (degrees) |
-| **Crosshair** | Toggle center reference |
-
-### Landmark Editor
-
-1. Open `http://localhost:8080/web/editor.html`
-2. Select a photo from the dropdown (✗ = no Ben detected, ✓ = detected)
-3. Click to place: Left Eye (green) → Right Eye (blue) → Mouth (orange)
-4. Click "Save to face_data.json"
-5. Landmarks are saved directly to `face_data.json`
-
----
-
-## Integration Example
-
-To integrate this normalization into your own project:
-
-```javascript
-// Load face data
-const data = await fetch('output/face_data.json').then(r => r.json());
-
-// For each photo with Ben detected
-for (const photo of data.photos) {
-    if (!photo.faces?.ben?.detected) continue;
-
-    // Get landmarks
-    const landmarks = photo.faces.ben.landmarks;
-    const points = getFacePoints(landmarks);
-
-    // Compute transform (150px eye distance, centered on 1920x1080 viewport)
-    const transform = computeSimilarityTransform(points, 1920, 1080, 150);
-
-    // Apply to image element
-    img.style.transformOrigin = '0 0';
-    img.style.transform = `matrix(${transform.a}, ${transform.b}, ${transform.c}, ${transform.d}, ${transform.tx}, ${transform.ty})`;
-}
-```
-
----
-
-## Files
-
-| File | Description |
-|------|-------------|
-| `server.py` | HTTP server with save endpoint (use instead of `python -m http.server`) |
-| `src/detect_faces.py` | Main face detection script |
-| `src/extract_rotation.py` | 3D head pose estimation |
-| `src/extract_metadata.py` | EXIF/filename date extraction |
-| `output/face_data.json` | Generated detection data (also stores manual edits) |
-| `web/centered.html` | Normalized face viewer |
-| `web/editor.html` | Manual landmark editor |
-| `web/index.html` | Debug viewer with overlays |
-
----
-
-## Dependencies
-
-- Python: `face_recognition`, `opencv-python`, `pillow`, `numpy`
-- Web: Vanilla HTML/CSS/JS (no build step)
