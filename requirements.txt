@@ -1,0 +1,5 @@
+face_recognition>=1.3.0
+opencv-python>=4.8.0
+pillow>=10.0.0
+numpy>=1.24.0
+av>=10.0.0

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceFlow</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-header">
+            <div class="logo">
+                <span class="logo-icon">&raquo;</span>
+                <h1>FaceFlow</h1>
+            </div>
+            <p>Timeline of your face's flow</p>
+        </div>
+        <div class="nav-items">
+            <div class="nav-item active" data-page="preview">
+                <span class="nav-item-icon">&#9658;</span>
+                <span class="nav-item-label">Preview</span>
+            </div>
+            <div class="nav-item" data-page="status">
+                <span class="nav-item-icon">&#9673;</span>
+                <span class="nav-item-label">Status</span>
+            </div>
+            <div class="nav-item" data-page="render">
+                <span class="nav-item-icon">&#9678;</span>
+                <span class="nav-item-label">Render</span>
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="sidebar-section" id="controlsSection">
+            <h4>Controls</h4>
+
+            <div class="control-row">
+                <span class="control-label">Birth Date</span>
+                <div class="birthdate-row">
+                    <input type="date" id="birthDateInput" value="1996-02-07">
+                    <button class="btn small" id="saveBirthDateBtn">Save</button>
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span class="control-label">Face Width</span>
+                <input type="range" id="previewScale" min="50" max="300" value="150">
+                <span class="control-value" id="previewScaleValue">150px</span>
+            </div>
+
+            <div class="control-row">
+                <span class="control-label">Angle</span>
+                <input type="number" id="previewAngle" min="-180" max="180" value="0" step="1"> &deg;
+            </div>
+
+            <div class="checkbox-row">
+                <input type="checkbox" id="scaleCheck" checked>
+                <label for="scaleCheck">Scale faces</label>
+            </div>
+            <div class="checkbox-row">
+                <input type="checkbox" id="rotateCheck" checked>
+                <label for="rotateCheck">Rotate faces</label>
+            </div>
+            <div class="checkbox-row">
+                <input type="checkbox" id="showAgeCheck" checked>
+                <label for="showAgeCheck">Show Age</label>
+            </div>
+
+            <div class="control-row" style="margin-top: 12px;">
+                <span class="control-label">Slideshow</span>
+                <div class="slideshow-row">
+                    <button class="btn small" id="slideshowBtn">Play</button>
+                    <input type="number" id="slideshowInterval" min="10" max="5000" value="200" step="10">
+                    <span>ms</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tools Section (Preview) -->
+        <div class="sidebar-section" id="toolsSection">
+            <h4>Tools</h4>
+
+            <div class="control-row" id="debugModeRow">
+                <button class="btn secondary" id="debugModeBtn">Debug & Age</button>
+            </div>
+
+            <div class="control-row" style="margin-top: 12px;">
+                <button class="btn secondary" id="setLandmarksBtn">Fix Detection</button>
+            </div>
+
+            <div class="control-row" id="deletePhotoRow">
+                <button class="btn danger" id="deletePhotoBtn">Delete Photo</button>
+            </div>
+        </div>
+
+        <!-- Actions Section (Status) -->
+        <div class="sidebar-section hidden" id="statusActionsSection">
+            <h4>Actions</h4>
+
+            <div class="control-row">
+                <button class="btn" id="scanBtn">Scan Photos</button>
+            </div>
+            <div class="control-row">
+                <button class="btn" id="refreshStatusBtn">Refresh</button>
+            </div>
+        </div>
+
+        <!-- Folders Section (Status) -->
+        <div class="sidebar-section hidden" id="foldersSection">
+            <h4>Folders</h4>
+
+            <div class="control-row">
+                <button class="btn secondary" id="openPhotosBtn">Open Photos</button>
+            </div>
+            <div class="control-row">
+                <button class="btn secondary" id="openReferenceBtn">Open Reference</button>
+            </div>
+            <div class="control-row">
+                <button class="btn secondary" id="openDataBtn">Open Data</button>
+            </div>
+        </div>
+
+        <!-- Actions Section (Render) -->
+        <div class="sidebar-section hidden" id="renderActionsSection">
+            <h4>Output</h4>
+
+            <div class="control-row">
+                <button class="btn secondary" id="openOutFolderBtn">Open Output Folder</button>
+            </div>
+        </div>
+
+        <div class="nav-footer" id="previewFooter">
+            Use arrow keys to navigate photos
+        </div>
+    </nav>
+
+    <main class="main">
+        <!-- Preview Page -->
+        <div id="page-preview" class="page active">
+            <div class="preview-layout">
+                <div class="preview-main">
+                    <div id="preview-content" class="content">
+                        <div class="photo-container" id="previewContainer">
+                            <div class="age-display" id="previewAge"></div>
+                            <canvas id="editCanvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="scrubber" id="previewScrubber">
+                        <div class="scrubber-track" id="previewTrack">
+                            <div class="scrubber-progress" id="previewProgress"></div>
+                            <div class="scrubber-thumb" id="previewThumb"></div>
+                        </div>
+                        <div class="scrubber-info" id="previewInfo">0 / 0</div>
+                    </div>
+                </div>
+
+                <!-- Debug Sidebar (shown when debug mode is on) -->
+                <div class="debug-sidebar" id="debugSidebar">
+                    <div class="debug-section">
+                        <h3>Photo Info</h3>
+                        <div class="debug-info">
+                            <p><strong>Filename:</strong> <span id="debugFilename">-</span></p>
+                            <p><strong>Age:</strong> <span id="debugAge">-</span></p>
+                            <div class="date-editor">
+                                <input type="number" id="debugAgeInput" step="0.01" min="0" max="100" style="width: 70px;">
+                                <button class="btn small" id="debugSaveAgeBtn">Set Age</button>
+                            </div>
+                            <p><strong>Date:</strong> <span id="debugDate">-</span></p>
+                            <div class="date-editor">
+                                <input type="datetime-local" id="debugDateInput">
+                                <button class="btn small" id="debugSaveDateBtn">Set Date</button>
+                            </div>
+                            <p><strong>Size:</strong> <span id="debugSize">-</span></p>
+                        </div>
+                    </div>
+                    <div class="debug-section">
+                        <h3>Subject Detection</h3>
+                        <div class="debug-subject-box" id="debugSubjectBox">
+                            <p><strong>Detected:</strong> <span id="debugSubjectDetected">-</span></p>
+                            <p><strong>Confidence:</strong> <span id="debugSubjectConfidence">-</span></p>
+                            <p><strong>Position:</strong> <span id="debugSubjectPosition">-</span></p>
+                            <p><strong>Face Size:</strong> <span id="debugSubjectSize">-</span></p>
+                        </div>
+                    </div>
+                    <div class="debug-section">
+                        <h3>Landmarks</h3>
+                        <div class="debug-info">
+                            <p><strong>Left Eye:</strong> <span id="debugLeftEye">-</span></p>
+                            <p><strong>Right Eye:</strong> <span id="debugRightEye">-</span></p>
+                            <p><strong>Mouth:</strong> <span id="debugMouth">-</span></p>
+                        </div>
+                    </div>
+                    <div class="debug-section">
+                        <h3>All Faces</h3>
+                        <div class="debug-info">
+                            <p><strong>Total:</strong> <span id="debugTotalFaces">-</span></p>
+                            <p><strong>Others:</strong> <span id="debugOtherFaces">-</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editor Sidebar (shown when editing landmarks) -->
+                <div class="editor-sidebar" id="editorSidebar">
+                    <div class="editor-section">
+                        <h3>Set Landmarks</h3>
+                        <div class="landmark-item active" id="editorLeftEye" data-landmark="leftEye">
+                            <div class="landmark-dot left-eye"></div>
+                            <div class="landmark-info">
+                                <div class="landmark-name">1. Left Eye</div>
+                                <div class="landmark-coords" id="editorLeftEyeCoords">Click to set</div>
+                            </div>
+                        </div>
+                        <div class="landmark-item" id="editorRightEye" data-landmark="rightEye">
+                            <div class="landmark-dot right-eye"></div>
+                            <div class="landmark-info">
+                                <div class="landmark-name">2. Right Eye</div>
+                                <div class="landmark-coords" id="editorRightEyeCoords">Click to set</div>
+                            </div>
+                        </div>
+                        <div class="landmark-item" id="editorMouth" data-landmark="mouth">
+                            <div class="landmark-dot mouth"></div>
+                            <div class="landmark-info">
+                                <div class="landmark-name">3. Mouth</div>
+                                <div class="landmark-coords" id="editorMouthCoords">Click to set</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="editor-section">
+                        <h3>Instructions</h3>
+                        <div class="editor-instructions">
+                            <p>Click on the image to place each landmark point.</p>
+                            <p style="margin-top:6px;">Keyboard shortcuts:</p>
+                            <p><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> Select landmark</p>
+                            <p><kbd>Esc</kbd> Cancel editing</p>
+                        </div>
+                    </div>
+                    <div class="editor-buttons">
+                        <button class="btn secondary" id="editorResetBtn">Reset</button>
+                        <button class="btn" id="editorSaveBtn" disabled>Save</button>
+                    </div>
+                    <button class="btn secondary" id="editorCancelBtn" style="margin-top: 8px;">Cancel</button>
+                    <div id="editorStatus" class="status-message"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Page -->
+        <div id="page-status" class="page">
+            <div id="status-content" class="content">
+                <div class="status-grid">
+                    <div class="status-card">
+                        <h3>Photos</h3>
+                        <div class="value" id="statusPhotosCount">-</div>
+                        <div class="subtitle">in photos/ folder</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Reference</h3>
+                        <div class="value" id="statusReferenceCount">-</div>
+                        <div class="subtitle">in reference/ folder</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Processed</h3>
+                        <div class="value" id="statusProcessedCount">-</div>
+                        <div class="subtitle">in face_data.json</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Subject Detected</h3>
+                        <div class="value success" id="statusDetectedCount">-</div>
+                        <div class="subtitle">photos with subject</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Unprocessed</h3>
+                        <div class="value warning" id="statusUnprocessedCount">-</div>
+                        <div class="subtitle">need scanning</div>
+                    </div>
+                </div>
+
+                <div class="status-section">
+                    <div class="section-header">
+                        <h3>Scan Output</h3>
+                        <button class="btn" id="scanBtnMain"><span id="scanBtnMainText">Scan Photos</span><span class="spinner hidden" id="scanSpinner"></span></button>
+                    </div>
+                    <div class="log-output" id="scanLog">Click "Scan Photos" to detect faces in new photos...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Render Page -->
+        <div id="page-render" class="page">
+            <div id="render-content" class="content">
+                <div class="render-layout">
+                    <!-- Start Render Button -->
+                    <div class="render-action">
+                        <button class="btn large" id="startRenderBtn">Start Render</button>
+                    </div>
+
+                    <!-- Progress Panel (shown during render) -->
+                    <div class="render-progress hidden" id="renderProgress">
+                        <div class="progress-header">
+                            <h3>Rendering...</h3>
+                            <button class="btn small danger" id="cancelRenderBtn">Cancel</button>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="renderProgressBar"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span class="progress-text" id="renderProgressText">0%</span>
+                            <span class="frame-counter" id="renderFrameCounter">Frame 0 / 0</span>
+                        </div>
+                        <div class="render-log-section">
+                            <h4>Log</h4>
+                            <div class="log-output" id="renderLog"></div>
+                        </div>
+                    </div>
+
+                    <!-- Complete Panel (shown after render) -->
+                    <div class="render-complete hidden" id="renderComplete">
+                        <div class="complete-message">Render complete!</div>
+                        <div class="output-info" id="renderOutputInfo"></div>
+                        <div class="complete-buttons">
+                            <button class="btn secondary" id="openOutFolderBtnComplete">Open Output Folder</button>
+                            <button class="btn" id="openVideoBtn">View Rendered Video</button>
+                            <button class="btn hidden" id="openOverlayBtn">View Overlay Video</button>
+                        </div>
+                    </div>
+
+                    <!-- Settings Panel -->
+                    <div class="render-settings" id="renderSettings">
+                        <div class="settings-section">
+                            <h3>Output Settings</h3>
+                            <div class="setting-row">
+                                <label>Output Folder</label>
+                                <input type="text" id="renderOutputFolder" value="out" readonly class="input-readonly">
+                            </div>
+                            <div class="setting-row">
+                                <label>Filename</label>
+                                <input type="text" id="renderFilename" value="faceflow_render" placeholder="faceflow_render">
+                            </div>
+                            <div class="setting-row">
+                                <label>Format</label>
+                                <select id="renderFormat">
+                                    <option value="mp4">MP4 (H.264)</option>
+                                    <option value="gif">GIF</option>
+                                    <option value="png_sequence">PNG Sequence</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Resolution</h3>
+                            <div class="resolution-inputs">
+                                <div class="setting-row inline">
+                                    <label>Width</label>
+                                    <input type="number" id="renderWidth" value="1920" min="320" max="4096">
+                                </div>
+                                <div class="setting-row inline">
+                                    <label>Height</label>
+                                    <input type="number" id="renderHeight" value="1080" min="240" max="2160">
+                                </div>
+                            </div>
+                            <div class="resolution-presets">
+                                <button class="btn small secondary resolution-preset" data-width="1920" data-height="1080">1080p</button>
+                                <button class="btn small secondary resolution-preset" data-width="1280" data-height="720">720p</button>
+                                <button class="btn small secondary resolution-preset" data-width="1080" data-height="1080">Square</button>
+                                <button class="btn small secondary resolution-preset" data-width="1080" data-height="1920">9:16</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Timing</h3>
+                            <div class="setting-row">
+                                <label>Duration per Photo</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="renderFrameDuration" value="200" min="10" max="5000" step="10">
+                                    <span>ms</span>
+                                </div>
+                            </div>
+                            <div class="setting-hint">Video renders at 30 FPS with frame duplication</div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Transform Settings</h3>
+                            <div class="setting-row">
+                                <label>Face Width</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="renderFaceWidth" value="150" min="50" max="300">
+                                    <span>px</span>
+                                </div>
+                            </div>
+                            <div class="setting-row">
+                                <label>Angle Offset</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="renderAngle" value="0" min="-180" max="180">
+                                    <span>deg</span>
+                                </div>
+                            </div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="renderScale" checked>
+                                <label for="renderScale">Scale faces</label>
+                            </div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="renderRotate" checked>
+                                <label for="renderRotate">Rotate faces</label>
+                            </div>
+                            <div class="setting-row">
+                                <label>Age Overlay</label>
+                                <select id="renderAgeMode">
+                                    <option value="show">Show age overlay</option>
+                                    <option value="hide">Don't show age overlay</option>
+                                    <option value="separate">Generate separately</option>
+                                    <option value="overlay_only">Generate age overlay only</option>
+                                </select>
+                                <div class="setting-hint" id="ageModeHint">Age will be rendered on the video</div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Frame Range</h3>
+                            <div class="frame-range-inputs">
+                                <div class="setting-row inline">
+                                    <label>Start</label>
+                                    <input type="number" id="renderStartFrame" value="1" min="1">
+                                </div>
+                                <div class="setting-row inline">
+                                    <label>End</label>
+                                    <input type="number" id="renderEndFrame" value="1" min="1">
+                                </div>
+                            </div>
+                            <div class="frame-count" id="renderFrameCount">0 photos available</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# User data - do not commit
+photos/
+reference/
+data/face_data.json
+data/manual_overrides.json
+data/scan.log
+data/render.log
+out/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+.env
+
+# Node
+video/node_modules/
+video/out/
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
