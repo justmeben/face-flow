@@ -40,6 +40,17 @@ python server.py
 4. **Preview** — Browse your timeline, adjust alignment settings
 5. **Render** — Export your timelapse video
 
+## Design Choices
+
+FaceFlow is intentionally minimal:
+
+- **No frontend framework** — Vanilla HTML, CSS, and JavaScript
+- **No backend framework** — Simple Python HTTP server with a few API endpoints
+- **No Node.js** — No npm, no build step, no bundler
+- **Minimal dependencies** — Only what's needed for face detection (`face_recognition`, `opencv-python`, `pillow`)
+
+Just clone, install Python deps, and run.
+
 ## Requirements
 
 - Python 3.8+
