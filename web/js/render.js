@@ -27,6 +27,14 @@ export function setupRenderPage() {
     // Age mode hint update
     document.getElementById('renderAgeMode').addEventListener('change', updateAgeModeHint);
 
+    // Blur slider update
+    const blurSlider = document.getElementById('renderBlur');
+    const blurValue = document.getElementById('renderBlurValue');
+    blurSlider.addEventListener('input', () => {
+        const val = parseInt(blurSlider.value);
+        blurValue.textContent = val === 0 ? 'Off' : `${val}px`;
+    });
+
     // Start render button
     document.getElementById('startRenderBtn').addEventListener('click', startRender);
 
@@ -142,6 +150,7 @@ async function startRender() {
         do_scale: document.getElementById('renderScale').checked,
         do_rotate: document.getElementById('renderRotate').checked,
         age_mode: document.getElementById('renderAgeMode').value,
+        blur_amount: parseInt(document.getElementById('renderBlur').value) || 0,
         start_frame: parseInt(document.getElementById('renderStartFrame').value) || 1,
         end_frame: parseInt(document.getElementById('renderEndFrame').value) || state.previewPhotos.length,
         birth_date: state.birthDate

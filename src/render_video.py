@@ -279,6 +279,7 @@ def render_video(config):
     - start_frame: int (1-indexed)
     - end_frame: int (1-indexed)
     - birth_date: str
+    - blur_amount: int (0 = no blur, higher = more blur)
     """
     global render_state
 
@@ -303,11 +304,15 @@ def render_video(config):
         if "show_age" in config and "age_mode" not in config:
             age_mode = "show" if config["show_age"] else "hide"
 
+        blur_amount = config.get("blur_amount", 0)
+
         log("Starting render...")
         log(f"Format: {config['format']}")
         log(f"Resolution: {config['width']}x{config['height']}")
         log(f"Frame duration: {config['frame_duration_ms']}ms per photo")
         log(f"Age mode: {age_mode}")
+        if blur_amount > 0:
+            log(f"Blur: {blur_amount}px")
 
         # Load face data
         if not FACE_DATA_PATH.exists():
@@ -468,6 +473,12 @@ def render_video(config):
             frame = cv2.warpAffine(img, transform_matrix, (width, height),
                                    borderMode=cv2.BORDER_CONSTANT,
                                    borderValue=(0, 0, 0))
+
+            # Apply blur if requested
+            if blur_amount > 0:
+                # Kernel size must be odd
+                kernel_size = blur_amount * 2 + 1
+                frame = cv2.GaussianBlur(frame, (kernel_size, kernel_size), 0)
 
             # Get age for this photo
             photo_date = photo.get("metadata", {}).get("date_taken")
